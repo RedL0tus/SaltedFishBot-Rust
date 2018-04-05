@@ -1,6 +1,11 @@
 #[macro_use]
 extern crate log;
+
+// Configuration reading support
 extern crate toml;
+#[macro_use]
+extern crate serde_derive;
+extern crate serde;
 
 use std::error::Error;
 
