@@ -16,6 +16,20 @@ pub struct Config {
     token: Option<String>,
 }
 
+impl Config {
+    pub fn new(token: &String) -> Result<Config, &'static str> {
+        if token.len() > 0 {
+            return Ok(
+                Config {
+                    token: Some(token.clone())
+                }
+            )
+        } else {
+            return Err("Invalid token");
+        }
+    }
+}
+
 /// Reads config (TOML) from file
 pub fn parse_config(config_filename: String) -> Result<Config, Box<Error>> {
     debug!("Reading config from: {}", config_filename);
