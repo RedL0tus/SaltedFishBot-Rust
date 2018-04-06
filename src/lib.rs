@@ -10,7 +10,7 @@ extern crate serde;
 
 use std::error::Error;
 
-mod config;
+pub mod config;
 
 pub fn run(config_filename: String) -> Result<(), Box<Error>> {
     debug!("Got parameter \"{}\"", config_filename);
@@ -20,6 +20,6 @@ pub fn run(config_filename: String) -> Result<(), Box<Error>> {
         return Err(e);
     }
     let config = config.unwrap();
-    debug!("Got token \"{}\" from config file", config.token.unwrap());
+    debug!("Got token \"{}\" from config file", &config.token.unwrap());
     return Ok(());
 }

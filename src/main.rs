@@ -38,7 +38,7 @@ fn main() {
     // Find config file from command line option
     let config_filename: String;
     match matches.value_of("config") {
-        Some(_) => config_filename = matches.value_of("config").unwrap().to_string(),
+        Some(filename) => config_filename = filename.to_string(),
         None => config_filename = String::from("config.toml"),
     }
     // When the subcommand is `run`
@@ -47,8 +47,24 @@ fn main() {
         info!("Reading config from {}", config_filename);
         if let Err(e) = salted_fish_bot::run(config_filename) {
             error!("Application error: {}", e);
+            process::exit(1);
+        }
+        process::exit(0);
+    }
+    // When the subcommand is `generate_config`
+    if let Some(matches) = matches.subcommand_matches("generate_config") {
+        // Generate config
+        info!("Generating config from command line arguments...");
+        if let None =  matches.value_of("token") {
+            error!("Token not found in arguments.");
             process::exit(2);
         }
+        // Bring the configuration utility into scope
+        use salted_fish_bot::config::*;
+        // Using the configuration utility to save config
+        let config = Config::new(&matches.value_of("token").unwrap().to_string()).expect("Invalid token");
+        config.write(&config_filename).expect("Cannot write config");
+        info!("Done, configuration saved to {}", config_filename);
         process::exit(0);
     }
     info!("No command specified, use --help for more information");
