@@ -8,9 +8,15 @@ extern crate toml;
 extern crate serde_derive;
 extern crate serde;
 
+// Telegram bot
+extern crate futures;
+extern crate tokio_core;
+extern crate telebot;
+
 use std::error::Error;
 
 pub mod config;
+pub mod telegram;
 
 pub fn run(config_filename: String) -> Result<(), Box<Error>> {
     debug!("Got parameter \"{}\"", config_filename);
@@ -21,5 +27,7 @@ pub fn run(config_filename: String) -> Result<(), Box<Error>> {
     }
     let config = config.unwrap();
     debug!("Got token \"{}\" from config file", &config.token.unwrap());
+    debug!("Starting telegram bot...");
+    telegram::startup(config);
     return Ok(());
 }
