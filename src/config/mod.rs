@@ -13,7 +13,7 @@ use std::io::prelude::*;
 #[derive(PartialEq)]
 #[derive(Deserialize)]
 pub struct Config {
-    token: Option<String>,
+    pub token: Option<String>,
 }
 
 impl Config {
@@ -35,14 +35,14 @@ pub fn parse_config(config_filename: String) -> Result<Config, Box<Error>> {
     debug!("Reading config from: {}", config_filename);
     // Read from file
     let file = File::open(config_filename);
-    if let Err(error) = file {
-        error!("Error while reading file: {}", error);
-        return Err(Box::new(error));
+    if let Err(e) = file {
+        error!("Error while reading file: {}", e);
+        return Err(Box::new(e));
     };
     let mut content = String::new();
-    if let Err(error) = file.unwrap().read_to_string(&mut content) {
-        error!("Error while reading file: {}", error);
-        return Err(Box::new(error));
+    if let Err(e) = file.unwrap().read_to_string(&mut content) {
+        error!("Error while reading file: {}", e);
+        return Err(Box::new(e));
     };
     // Parsing
     let config: Config = toml::from_str(&content).unwrap();

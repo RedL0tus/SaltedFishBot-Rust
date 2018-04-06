@@ -6,7 +6,6 @@ extern crate salted_fish_bot;
 
 use std::env;
 use std::process;
-use std::path::Path;
 use clap::{Arg, App, SubCommand};
 
 fn main() {
@@ -27,6 +26,8 @@ fn main() {
                 .short("t")
                 .help("Bot token from BotFather")
                 .takes_value(true)))
+        .subcommand(SubCommand::with_name("run")
+            .about("Run the bot"))
         .get_matches();
     // Initialize logger
     if let Err(_) = env::var("SALTED_BOT_LOG"){
@@ -40,15 +41,16 @@ fn main() {
         Some(_) => config_filename = matches.value_of("config").unwrap().to_string(),
         None => config_filename = String::from("config.toml"),
     }
-    // Check if the config file exists or not
-    if ! Path::new(&config_filename).exists() {
-        error!("Config file \"{}\" not found!", config_filename);
-        process::exit(1);
+    // When the subcommand is `run`
+    if let Some(_) = matches.subcommand_matches("run") {
+        // Run the main program
+        info!("Reading config from {}", config_filename);
+        if let Err(e) = salted_fish_bot::run(config_filename) {
+            error!("Application error: {}", e);
+            process::exit(2);
+        }
+        process::exit(0);
     }
-    // Run the main program
-    info!("Using config from {}.", config_filename);
-    if let Err(e) = salted_fish_bot::run(config_filename) {
-        error!("Application error: {}", e);
-        process::exit(2);
-    }
+    info!("No command specified, use --help for more information");
+    process::exit(0);
 }
