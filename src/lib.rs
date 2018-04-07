@@ -26,8 +26,8 @@ pub fn run(config_filename: String) -> Result<(), Box<Error>> {
         return Err(e);
     }
     let config = config.unwrap();
-    debug!("Got token \"{}\" from config file", &config.token.unwrap());
+    debug!("Got token \"{:?}\" from config file", &config.token);
     debug!("Starting telegram bot...");
-    telegram::startup(config);
+    telegram::startup(config).unwrap();
     return Ok(());
 }
