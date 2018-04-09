@@ -37,19 +37,9 @@ impl Config {
 
     /// Write config to file at given location
     pub fn write(&self, location: &String) -> Result<(), Box<Error>> {
-        let content = toml::to_string(&self);
-        if let Err(e) = content {
-            return Err(Box::new(e));
-        }
-        let content: String = content.unwrap();
-        let buffer = File::create(location);
-        if let Err(e) = buffer {
-            return Err(Box::new(e));
-        }
-        let mut buffer = buffer.unwrap();
-        if let Err(e) = buffer.write(content.as_bytes()) {
-            return Err(Box::new(e));
-        }
+        let content = toml::to_string(&self)?;
+        let mut buffer = File::create(location)?;
+        buffer.write(content.as_bytes())?;
         return Ok(());
     }
 }
@@ -58,19 +48,12 @@ impl Config {
 pub fn parse_config(config_filename: String) -> Result<Config, Box<Error>> {
     debug!("Reading config from: {}", config_filename);
     // Read from file
-    let file = File::open(config_filename);
-    if let Err(e) = file {
-        error!("Error while reading file: {}", e);
-        return Err(Box::new(e));
-    };
+    let mut file = File::open(config_filename)?;
     let mut content = String::new();
-    if let Err(e) = file.unwrap().read_to_string(&mut content) {
-        error!("Error while reading file: {}", e);
-        return Err(Box::new(e));
-    };
+    file.read_to_string(&mut content)?;
     debug!("Got: {}", content);
     // Parsing
-    let config: Config = toml::from_str(&content).unwrap();
+    let config: Config = toml::from_str(&content)?;
     return Ok(config);
 }
 

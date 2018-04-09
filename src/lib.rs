@@ -22,15 +22,10 @@ pub mod telegram;
 
 pub fn run(config_filename: String) -> Result<(), Box<Error>> {
     debug!("Got parameter \"{}\"", config_filename);
-    let config = config::parse_config(config_filename);
-    if let Err(e) = config {
-        error!("Error while parsing config: {}", e);
-        return Err(e);
-    }
-    let config = config.unwrap();
+    let config = config::parse_config(config_filename)?;
     debug!("Got token \"{:?}\" from config file", &config.token);
     debug!("Got username \"{:?}\" from config file", &config.username);
     debug!("Starting telegram bot...");
-    telegram::startup(config).unwrap();
+    telegram::startup(config)?;
     return Ok(());
 }
