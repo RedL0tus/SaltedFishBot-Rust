@@ -25,10 +25,6 @@ fn main() {
             .arg(Arg::with_name("token")
                 .short("t")
                 .help("Bot token from BotFather")
-                .takes_value(true))
-            .arg(Arg::with_name("username")
-                .short("u")
-                .help("Username of the bot, ending with \"bot\"")
                 .takes_value(true)))
         .subcommand(SubCommand::with_name("run")
             .about("Run the bot"))
@@ -63,17 +59,10 @@ fn main() {
             error!("Token not found in arguments.");
             process::exit(2);
         }
-        if let None = matches.value_of("username") {
-            error!("Username not found in arguments.");
-            process::exit(2);
-        }
         // Bring the configuration utility into scope
         use salted_fish_bot::config::*;
         // Using the configuration utility to save config
-        let config = Config::new(
-            &matches.value_of("token").unwrap().to_string(),
-            &matches.value_of("username").unwrap().to_string()
-            ).expect("Invalid token or username");
+        let config = Config::new(&matches.value_of("token").unwrap().to_string()).expect("Invalid token");
         config.write(&config_filename).expect("Cannot write config");
         info!("Done, configuration saved to {}", config_filename);
         process::exit(0);

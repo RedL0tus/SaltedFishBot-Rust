@@ -11,8 +11,7 @@ extern crate serde;
 // Telegram bot
 extern crate futures;
 extern crate tokio_core;
-extern crate hyper;
-extern crate serde_json;
+extern crate telebot;
 
 use std::error::Error;
 
