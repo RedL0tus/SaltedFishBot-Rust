@@ -17,21 +17,19 @@ use std::io::prelude::*;
 #[derive(Deserialize)]
 pub struct Config {
     pub token: Option<String>,
-    pub username: Option<String>,
 }
 
 impl Config {
     /// Generate new config
-    pub fn new(token: &String, username: &String) -> Result<Config, &'static str> {
-        if token.len() > 0 && username.len() > 0{
+    pub fn new(token: &String) -> Result<Config, &'static str> {
+        if token.len() > 0 {
             return Ok(
                 Config {
-                    token: Some(token.to_string()),
-                    username: Some(username.to_string()),
+                    token: Some(token.clone())
                 }
             )
         } else {
-            return Err("Invalid token or username");
+            return Err("Invalid token");
         }
     }
 
@@ -66,27 +64,25 @@ mod test {
     #[test]
     fn config_parser() {
         {
-            let mut buffer = fs::File::create("test_parse.toml").unwrap();
-            buffer.write(b"token = 'test'\nusername = 'testusername'").unwrap();
+            let mut buffer = fs::File::create("test.toml").unwrap();
+            buffer.write(b"token = 'test'").unwrap();
             assert_eq!(
-                parse_config("test_parse.toml".to_string()).unwrap(),
+                parse_config("test.toml".to_string()).unwrap(),
                 Config {
                     token: Some("test".to_string()),
-                    username: Some("testusername".to_string()),
                 }
             );
         }
-        fs::remove_file("test_parse.toml").unwrap();
+        fs::remove_file("test.toml").unwrap();
     }
 
     // Test config generating functionality
     #[test]
     fn config_generate() {
         assert_eq!(
-            Config::new(&"test".to_string(), &"testusername".to_string()).unwrap(),
+            Config::new(&"test".to_string()).unwrap(),
             Config {
                 token: Some("test".to_string()),
-                username: Some("testusername".to_string()),
             }
         );
     }
@@ -94,15 +90,14 @@ mod test {
     // Test config writing functionality
     #[test]
     fn config_write() {
-        let config = Config::new(&"test".to_string(), &"testusername".to_string()).unwrap();
-        config.write(&"test_generate.toml".to_string()).unwrap();
-        let mut file = fs::File::open("test_generate.toml").unwrap();
+        let config = Config::new(&"test".to_string()).unwrap();
+        config.write(&"test.toml".to_string());
+        let mut file = fs::File::open("test.toml").unwrap();
         let mut content = String::new();
         file.read_to_string(&mut content).unwrap();
         assert_eq!(
             content,
-            "token = \"test\"\nusername = \"testusername\"\n".to_string()
+            "token = \"test\"\n".to_string()
         );
-        fs::remove_file("test_generate.toml").unwrap();
     }
 }
