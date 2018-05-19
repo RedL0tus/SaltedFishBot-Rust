@@ -23,13 +23,13 @@ impl Config {
     /// Generate new config
     pub fn new(token: &String) -> Result<Config, &'static str> {
         if token.len() > 0 {
-            return Ok(
+            Ok(
                 Config {
                     token: Some(token.clone())
                 }
             )
         } else {
-            return Err("Invalid token");
+            Err("Invalid token")
         }
     }
 
@@ -38,7 +38,7 @@ impl Config {
         let content = toml::to_string(&self)?;
         let mut buffer = File::create(location)?;
         buffer.write(content.as_bytes())?;
-        return Ok(());
+        Ok(())
     }
 }
 
@@ -52,7 +52,7 @@ pub fn parse_config(config_filename: String) -> Result<Config, Box<Error>> {
     debug!("Got: {}", content);
     // Parsing
     let config: Config = toml::from_str(&content)?;
-    return Ok(config);
+    Ok(config)
 }
 
 #[cfg(test)]
@@ -91,7 +91,7 @@ mod test {
     #[test]
     fn config_write() {
         let config = Config::new(&"test".to_string()).unwrap();
-        config.write(&"test.toml".to_string());
+        config.write(&"test.toml".to_string()).unwrap();
         let mut file = fs::File::open("test.toml").unwrap();
         let mut content = String::new();
         file.read_to_string(&mut content).unwrap();

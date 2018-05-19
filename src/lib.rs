@@ -24,5 +24,5 @@ pub fn run(config_filename: String) -> Result<(), Box<Error>> {
     debug!("Got token \"{:?}\" from config file", &config.token);
     debug!("Starting telegram bot...");
     telegram::startup(config)?;
-    return Ok(());
+    Ok(())
 }

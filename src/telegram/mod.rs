@@ -36,7 +36,7 @@ pub fn startup(config: config::Config) -> Result<(), Box<Error>> {
     bot.register(handle);
 
     bot.run(&mut lp).unwrap();
-    return Ok(());
+    Ok(())
 }
 
 /// Get username
