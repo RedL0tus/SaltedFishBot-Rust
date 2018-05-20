@@ -53,6 +53,10 @@ fn main() {
             .arg(Arg::with_name("token")
                 .short("t")
                 .help("Bot token from BotFather")
+                .takes_value(true))
+            .arg(Arg::with_name("port")
+                .short("p")
+                .help("Port going to bind")
                 .takes_value(true)))
         .subcommand(SubCommand::with_name("run")
             .about("Run the bot"))
@@ -84,10 +88,18 @@ fn main() {
             error!("Token not found in arguments.");
             process::exit(2);
         }
+        let port:i16 = {
+            if let Some(input) = matches.value_of("port") {
+                input.parse::<i16>().unwrap()
+            } else {
+                warn!("No port specified, use 8090 as default.");
+                8090
+            }
+        };
         // Bring the configuration utility into scope
         use salted_fish_bot::config::*;
         // Using the configuration utility to save config
-        let config = Config::new(&matches.value_of("token").unwrap().to_string()).expect("Invalid token");
+        let config = Config::new(&matches.value_of("token").unwrap().to_string(), &port).expect("Invalid token");
         config.write(&config_filename).expect("Cannot write config");
         info!("Done, configuration saved to {}", config_filename);
         process::exit(0);

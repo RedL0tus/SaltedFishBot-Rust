@@ -17,15 +17,17 @@ use std::io::prelude::*;
 #[derive(Deserialize)]
 pub struct Config {
     pub token: Option<String>,
+    pub port: Option<i16>,
 }
 
 impl Config {
     /// Generate new config
-    pub fn new(token: &String) -> Result<Config, &'static str> {
+    pub fn new(token: &String, port: &i16) -> Result<Config, &'static str> {
         if token.len() > 0 {
             Ok(
                 Config {
-                    token: Some(token.clone())
+                    token: Some(token.clone()),
+                    port: Some(port.clone()),
                 }
             )
         } else {
@@ -65,11 +67,12 @@ mod test {
     fn config_parser() {
         {
             let mut buffer = fs::File::create("test.toml").unwrap();
-            buffer.write(b"token = 'test'").unwrap();
+            buffer.write(b"token = \"test\"\nport = 8090").unwrap();
             assert_eq!(
                 parse_config("test.toml".to_string()).unwrap(),
                 Config {
                     token: Some("test".to_string()),
+                    port: Some(8090),
                 }
             );
         }
@@ -80,9 +83,10 @@ mod test {
     #[test]
     fn config_generate() {
         assert_eq!(
-            Config::new(&"test".to_string()).unwrap(),
+            Config::new(&"test".to_string(), &8090).unwrap(),
             Config {
                 token: Some("test".to_string()),
+                port: Some(8090)
             }
         );
     }
@@ -90,14 +94,14 @@ mod test {
     // Test config writing functionality
     #[test]
     fn config_write() {
-        let config = Config::new(&"test".to_string()).unwrap();
+        let config = Config::new(&"test".to_string(), &8090).unwrap();
         config.write(&"test.toml".to_string()).unwrap();
         let mut file = fs::File::open("test.toml").unwrap();
         let mut content = String::new();
         file.read_to_string(&mut content).unwrap();
         assert_eq!(
             content,
-            "token = \"test\"\n".to_string()
+            "token = \"test\"\nport = 8090\n".to_string()
         );
     }
 }
