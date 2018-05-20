@@ -1,12 +1,40 @@
 #[macro_use]
 extern crate log;
 extern crate clap;
-extern crate env_logger;
+extern crate fern;
+extern crate chrono;
 extern crate salted_fish_bot;
 
-use std::env;
 use std::process;
 use clap::{Arg, App, SubCommand};
+
+// fern color support
+use fern::colors::{Color, ColoredLevelConfig};
+
+/// Setup logger (fern)
+fn setup_logger() -> Result<(), fern::InitError> {
+    // Setup colors
+    let colors = ColoredLevelConfig::new()
+        .error(Color::Red)
+        .warn(Color::Yellow)
+        .info(Color::Green)
+        .debug(Color::White)
+        .trace(Color::Blue);
+    fern::Dispatch::new()
+        .format(move |out, message, record| {
+            out.finish(format_args!(
+                "{} [{}] [{}] {}",
+                colors.color(record.level()),
+                chrono::Utc::now().format("%Y-%m-%d %H:%M:%S"),
+                record.target(),
+                message
+            ))
+        })
+        .level(log::LevelFilter::Info)
+        .chain(std::io::stdout())
+        .apply()?;
+    Ok(())
+}
 
 fn main() {
     // Use clap for command line support
@@ -30,10 +58,7 @@ fn main() {
             .about("Run the bot"))
         .get_matches();
     // Initialize logger
-    if let Err(_) = env::var("SALTED_BOT_LOG"){
-        env::set_var("SALTED_BOT_LOG", "info");
-    }
-    env_logger::init_from_env("SALTED_BOT_LOG");
+    setup_logger().expect("Failed to initialize logger.");
     info!("Starting up...");
     // Find config file from command line option
     let config_filename: String;
