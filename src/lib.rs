@@ -19,7 +19,7 @@ use std::thread;
 use std::error::Error;
 
 pub mod config;
-pub mod telegram;
+mod telegram;
 
 pub fn run(config_filename: String) -> Result<(), Box<Error>> {
     debug!("Got parameter \"{}\"", config_filename);

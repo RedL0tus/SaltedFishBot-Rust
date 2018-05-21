@@ -68,7 +68,7 @@ pub fn startup(config: config::Config) -> Result<(), Box<Error>> {
 }
 
 /// Command router
-pub fn process_commands(bot_name: Option<String>, message: telegram_bot::Message, data: &String, api: &telegram_bot::Api) -> Result<(), Box<Error>>{
+fn process_commands(bot_name: Option<String>, message: telegram_bot::Message, data: &String, api: &telegram_bot::Api) -> Result<(), Box<Error>>{
     let mut content = data.split_whitespace();
     if let Some(mut cmd) = content.next() {
         if let Some(name) = bot_name {
@@ -85,7 +85,7 @@ pub fn process_commands(bot_name: Option<String>, message: telegram_bot::Message
 }
 
 /// Get username
-pub fn get_username(user: telegram_bot::types::User) -> String {
+fn get_username(user: telegram_bot::types::User) -> String {
     if let Some(username) = user.username {
         String::from(format!("@{} ({})", username, user.id))
     } else {
@@ -93,7 +93,7 @@ pub fn get_username(user: telegram_bot::types::User) -> String {
     }
 }
 
-pub fn command_echo(message: telegram_bot::Message, api: &telegram_bot::Api) -> Result<(), Box<Error>> {
+fn command_echo(message: telegram_bot::Message, api: &telegram_bot::Api) -> Result<(), Box<Error>> {
     if let MessageKind::Text {ref data, ..} = message.kind {
         let mut content = data.split_whitespace();
         let mut response = String::new();
