@@ -128,3 +128,37 @@ fn command_echo(message: telegram_bot::Message, api: &telegram_bot::Api) -> Resu
     }
     Ok(())
 }
+
+#[cfg(test)]
+mod test {
+    use telegram_bot::*;
+    use super::*;
+
+    #[test]
+    fn username() {
+        let user: types::User = types::User {
+            id: types::UserId::new(114514810),
+            first_name: String::from("田所"),
+            last_name: Some(String::from("浩二")),
+            username: Some(String::from("YJSNPI"))
+        };
+        assert_eq!(
+            "@YJSNPI (114514810)",
+            get_username(user)
+        );
+    }
+
+    #[test]
+    fn user_id_only() {
+        let user: types::User = types::User {
+            id: types::UserId::new(114514810),
+            first_name: String::from("田所"),
+            last_name: None,
+            username: None
+        };
+        assert_eq!(
+            "114514810",
+            get_username(user)
+        );
+    }
+}
