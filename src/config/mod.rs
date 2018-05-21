@@ -11,6 +11,7 @@ use std::fs::File;
 use std::io::prelude::*;
 
 // Bot configuration
+#[derive(Clone)]
 #[derive(Debug)]
 #[derive(PartialEq)]
 #[derive(Serialize)]

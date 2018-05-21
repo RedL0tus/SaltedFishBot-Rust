@@ -13,6 +13,9 @@ extern crate futures;
 extern crate tokio_core;
 extern crate telegram_bot;
 
+// Multithreading
+use std::thread;
+
 use std::error::Error;
 
 pub mod config;
@@ -23,6 +26,9 @@ pub fn run(config_filename: String) -> Result<(), Box<Error>> {
     let config = config::parse_config(config_filename)?;
     debug!("Got token \"{:?}\" from config file", &config.token);
     debug!("Starting telegram bot...");
-    telegram::startup(config)?;
+    let handle_telegram = thread::spawn(move || {
+        telegram::startup(config.clone()).unwrap();
+    });
+    handle_telegram.join().unwrap();
     Ok(())
 }
