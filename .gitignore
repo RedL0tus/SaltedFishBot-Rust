@@ -2,3 +2,4 @@ config.toml
 /target/
 **/*.rs.bk
 test.toml
+.vscode
