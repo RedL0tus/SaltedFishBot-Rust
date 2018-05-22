@@ -22,6 +22,42 @@ use std::cell::RefCell;
 // Error messages
 const ERROR: &'static str = "發生了什麼不得了的事情，請聯繫 @TheSaltedFish";
 
+use std::fmt;
+
+// Avoid E0117 for User
+struct DisplayWrapperUser (telegram_bot::types::User);
+
+impl fmt::Display for DisplayWrapperUser {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        if let Some(ref username) = self.0.username{
+            write!(f, "@{} ({})", username, self.0.id)
+        } else {
+            write!(f, "ID {}", self.0.id)
+        }
+    }
+}
+
+// Avoid E0117 for MessageChat
+struct DisplayWrapperChat (telegram_bot::types::MessageChat);
+
+impl fmt::Display for DisplayWrapperChat {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self.0 {
+            telegram_bot::types::MessageChat::Private(_) => write!(f, "Private chat"),
+            telegram_bot::types::MessageChat::Group(ref group) => write!(f, "{} ({})", group.title, group.id),
+            telegram_bot::types::MessageChat::Supergroup(ref group) => {
+                if let Some(ref username) = group.username {
+                    write!(f , "{} (@{}, {})", group.title, username, group.id)
+                } else {
+                    write!(f , "{} ({})", group.title, group.id)
+                }
+            },
+            _ => write!(f, "Unknown"),
+        }
+    }
+}
+
+
 /// Startup
 pub fn startup(config: config::Config) -> Result<(), Box<Error>> {
     let mut core = Core::new().unwrap();
@@ -42,18 +78,7 @@ pub fn startup(config: config::Config) -> Result<(), Box<Error>> {
         if let UpdateKind::Message(message) = update.kind {
             //let message = RefCell::new(message);
             if let MessageKind::Text {ref data, ref entities, ..} = message.kind {
-                // Fetch requestee's username for logging
-                let requestee = get_username(message.from.clone());
-                // Fetch session name for logging
-                let from: String = {
-                    match message.chat {
-                        MessageChat::Private(_) => "Private chat".into(),
-                        MessageChat::Group(ref group) => format!("{} ({})", group.title, group.id).into(),
-                        MessageChat::Supergroup(ref group) => format!("{} ({})", group.title, group.id).into(),
-                        _ => "Unknown".into(),
-                    }
-                };
-                info!("[{}] {}: {}", from, requestee, data);
+                info!("[{}] {}: {}", DisplayWrapperChat(message.chat.clone()), DisplayWrapperUser(message.from.clone()), &data);
                 // Use entities to determine the message contains a command or not
                 for entity in entities.iter() {
                     debug!("Received entities: {:?}", entity);
@@ -95,17 +120,6 @@ fn command_router(bot_name: Option<String>, message: telegram_bot::Message, data
     Ok(())
 }
 
-/// Get username
-/// Returns a string in a format of "@Username (user id)"
-/// Such as: "@YJSNPI (114514810)"
-fn get_username(user: telegram_bot::types::User) -> String {
-    if let Some(username) = user.username {
-        String::from(format!("@{} ({})", username, user.id))
-    } else {
-        user.id.to_string()
-    }
-}
-
 /// Implementation of /echo
 fn command_echo(message: telegram_bot::Message, api: &telegram_bot::Api) -> Result<(), Box<Error>> {
     // Cut the first part before processing the message
@@ -120,10 +134,13 @@ fn command_echo(message: telegram_bot::Message, api: &telegram_bot::Api) -> Resu
             for i in content.clone() {
                 response.push_str(&format!("{} ", i).as_str());
             }
+            let len = response.len();
+            response.truncate(len - 1);
         }
         // Send the response
+        info!("Response length: {}", response.len());
         api.spawn(message.text_reply(
-            response
+            format!("{} 說：“{}”", DisplayWrapperUser(message.from.clone()), response)
         ));
     }
     Ok(())
@@ -144,7 +161,7 @@ mod test {
         };
         assert_eq!(
             "@YJSNPI (114514810)",
-            get_username(user)
+            format!("{}", DisplayWrapperUser(user))
         );
     }
 
@@ -157,8 +174,8 @@ mod test {
             username: None
         };
         assert_eq!(
-            "114514810",
-            get_username(user)
+            "ID 114514810",
+            format!("{}", DisplayWrapperUser(user))
         );
     }
 }
