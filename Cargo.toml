@@ -9,7 +9,7 @@ clap = "~2.31"
 toml = "~0.4"
 fern = { version = "~0.5", features = ["colored"] }
 serde = "~1.0"
-chrono = "0.4"
+chrono = "~0.4"
 futures = "~0.1"
 rusqlite = "~0.13"
 tokio-core = "~0.1"
