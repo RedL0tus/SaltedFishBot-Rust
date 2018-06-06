@@ -11,6 +11,7 @@ fern = { version = "~0.5", features = ["colored"] }
 serde = "~1.0"
 chrono = "0.4"
 futures = "~0.1"
+rusqlite = "~0.13"
 tokio-core = "~0.1"
 serde_derive = "~1.0"
 telegram-bot = { git = "https://github.com/telegram-rs/telegram-bot" }
