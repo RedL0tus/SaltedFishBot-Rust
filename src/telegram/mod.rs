@@ -13,14 +13,14 @@ use telegram_bot::*;
 // Configuration
 use super::config;
 
+// Strings
+use super::strings;
+
 // Error handling
 use std::error::Error;
 
 // RefCell
 use std::cell::RefCell;
-
-// Error messages
-const ERROR: &'static str = "發生了什麼不得了的事情，請聯繫 @TheSaltedFish";
 
 use std::fmt;
 
@@ -59,7 +59,7 @@ impl fmt::Display for DisplayWrapperChat {
 
 
 /// Startup
-pub fn startup(config: config::Config) -> Result<(), Box<Error>> {
+pub fn startup(config: config::Config, strings: strings::Strings) -> Result<(), Box<Error>> {
     let mut core = Core::new().unwrap();
     // Initialize telegram_bot instance
     let api = Api::configure(config.token.unwrap()).build(core.handle()).unwrap();
@@ -84,9 +84,9 @@ pub fn startup(config: config::Config) -> Result<(), Box<Error>> {
                     debug!("Received entities: {:?}", entity);
                     if entity.offset == 0 && entity.kind == telegram_bot::types::MessageEntityKind::BotCommand {
                         // Route message to command router
-                        command_router(bot_name.borrow().clone(), message.clone(), data, &api).map_err(|e|
+                        command_router(bot_name.borrow().clone(), message.clone(), data, &api, strings.clone()).map_err(|e|
                             // Send error message before quitting
-                            api.spawn(message.text_reply(format!("{}: {}", &ERROR, e).to_string()))
+                            api.spawn(message.text_reply(format!("{}: {}", strings.clone().error, e).to_string()))
                         ).expect("Fail to process commands");
                     }
                 }
@@ -101,7 +101,7 @@ pub fn startup(config: config::Config) -> Result<(), Box<Error>> {
 }
 
 /// Command router
-fn command_router(bot_name: Option<String>, message: telegram_bot::Message, data: &String, api: &telegram_bot::Api) -> Result<(), Box<Error>>{
+fn command_router(bot_name: Option<String>, message: telegram_bot::Message, data: &String, api: &telegram_bot::Api, strings: strings::Strings) -> Result<(), Box<Error>>{
     // Get the first part of the command
     let mut content = data.split_whitespace();
     if let Some(mut cmd) = content.next() {
@@ -113,7 +113,7 @@ fn command_router(bot_name: Option<String>, message: telegram_bot::Message, data
         }
         // The actuall router
         match cmd {
-            "/echo" => command_echo(message.clone(), &api)?,
+            "/echo" => command_echo(message.clone(), &api, strings.clone())?,
             _ => (),
         } 
     }
@@ -121,14 +121,14 @@ fn command_router(bot_name: Option<String>, message: telegram_bot::Message, data
 }
 
 /// Implementation of /echo
-fn command_echo(message: telegram_bot::Message, api: &telegram_bot::Api) -> Result<(), Box<Error>> {
+fn command_echo(message: telegram_bot::Message, api: &telegram_bot::Api, strings: strings::Strings) -> Result<(), Box<Error>> {
     // Cut the first part before processing the message
     if let MessageKind::Text {ref data, ..} = message.kind {
         let mut content = data.split_whitespace();
         let mut response = String::new();
         if content.clone().count() == 1 {
             // If nothing exists
-            response = "<什麼也沒有>".into();
+            response = strings.clone().echo_empty.into();
         } else {
             content.next();
             for i in content.clone() {

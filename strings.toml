@@ -1,0 +1,9 @@
+# Name
+NAME = "SaltedFish Bot"
+
+# Error message
+ERROR = "發生了什麼不得了的事情，請聯繫 @TheSaltedFish"
+
+# /echo
+ECHO_EMPTY = "<什麼也沒有>"
+ECHO = "{} 說：“{}”"
