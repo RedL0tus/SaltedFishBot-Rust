@@ -140,7 +140,10 @@ fn command_echo(message: telegram_bot::Message, api: &telegram_bot::Api, strings
         // Send the response
         info!("Response length: {}", response.len());
         api.spawn(message.text_reply(
-            format!("{} 說：“{}”", DisplayWrapperUser(message.from.clone()), response)
+            //format!("{} 說：“{}”", DisplayWrapperUser(message.from.clone()), response)
+            &strings.echo
+                .replace("{USERNAME}", &format!("{}", DisplayWrapperUser(message.from.clone())))
+                .replace("{CONTENT}", &response)
         ));
     }
     Ok(())
